@@ -5,57 +5,47 @@ import React from 'react';
 interface LiquidGlassProps {
   children: React.ReactNode;
   className?: string;
+  textColor?: string;
 }
 
-export const LiquidGlass: React.FC<LiquidGlassProps> = ({ children, className = '' }) => {
+export const LiquidGlass: React.FC<LiquidGlassProps> = ({ children, className = '', textColor }) => {
+  // 스펙큘러 하이라이트 (inset box-shadow로 프레넬 효과 시뮬레이션)
+  const specularHighlight = `
+    inset 10px 10px 20px rgba(153, 192, 255, 0.15),
+    inset 2px 2px 5px rgba(195, 218, 255, 0.25),
+    inset -10px -10px 20px rgba(229, 253, 190, 0.15),
+    inset -2px -2px 30px rgba(247, 255, 226, 0.25)
+  `;
+
   return (
     <div className={`relative inline-block ${className}`}>
-      {/* SVG Filters & Gradients */}
-      {/* Using inline SVG with 0 dimensions to define filters globally for this component instance */}
-      <svg width="0" height="0" className="absolute w-0 h-0 overflow-hidden" aria-hidden="true">
-        <defs>
-          <filter id="liquid-glass-filter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -5" result="goo" />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
-            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
-            <feDisplacementMap in="goo" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <linearGradient id="liquid-glass-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-            <stop offset="50%" stopColor="rgba(230,245,255,0.6)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0.2)" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Base Layer */}
+      {/* Glass Container - 블러 + 컬러필터 + 스펙큘러 */}
       <div
-        className="relative z-10 select-none"
+        className="relative rounded-2xl"
         style={{
+          backdropFilter: 'blur(20px) contrast(80%) saturate(120%)',
+          WebkitBackdropFilter: 'blur(20px) contrast(80%) saturate(120%)',
+          boxShadow: specularHighlight,
+        }}
+      >
+        {/* Text Layer */}
+        <div
+          className="relative z-10 select-none"
+          style={textColor ? {
+            color: textColor,
+            WebkitTextStroke: '0.015em rgba(255,255,255,0.4)',
+            filter: 'drop-shadow(0 15px 25px rgba(0,60,80,0.3))',
+          } : {
             color: 'transparent',
-            backgroundImage: 'url(#liquid-glass-gradient)',
             background: 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(220,245,255,0.7) 40%, rgba(255,255,255,0.2) 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             filter: 'drop-shadow(0 15px 25px rgba(0,60,80,0.3))',
             WebkitTextStroke: '0.025em rgba(255,255,255,0.6)',
-            strokeLinejoin: 'round'
-        }}
-      >
-        {children}
-      </div>
-
-      {/* Distortion Overlay Layer */}
-      <div
-        className="absolute top-0 left-0 right-0 w-full h-full select-none pointer-events-none mix-blend-soft-light"
-        style={{
-            color: 'rgba(255,255,255,0.9)',
-            filter: 'url(#liquid-glass-filter)',
-            WebkitTextStroke: '0.0125em rgba(255,255,255,0.3)',
-        }}
-      >
-        {children}
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

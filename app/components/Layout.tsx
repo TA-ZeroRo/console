@@ -64,10 +64,10 @@ export const DashboardLayout: React.FC<LayoutProps> = ({ children, onLogout }) =
         <div className="h-full flex flex-col">
           {/* Logo Area */}
           <div className="h-16 flex items-center px-6 border-b border-slate-800">
-            <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <Image src="/favicon.png" alt="Zeroro Logo" width={32} height={32} className="object-contain" />
               <span className="text-lg font-bold tracking-tight">Zeroro</span>
-            </div>
+            </Link>
           </div>
 
           {/* Nav Items */}

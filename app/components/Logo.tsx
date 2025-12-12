@@ -19,11 +19,11 @@ export const Logo: React.FC<LogoProps> = ({
   onClick,
 }) => {
   const containerStyles = variant === 'light'
-    ? 'bg-white/10 border-white/20 shadow-lg'
+    ? 'bg-gradient-to-b from-white/90 via-white/60 to-white/30 backdrop-blur-xl border-white/60 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]'
     : 'bg-slate-900/5 border-slate-900/10';
 
   const textStyles = variant === 'light'
-    ? 'text-white drop-shadow-md'
+    ? 'text-slate-900'
     : 'text-slate-900';
 
   const interactiveStyles = onClick ? 'cursor-pointer hover:bg-white/20 active:scale-95' : '';

@@ -47,14 +47,14 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/50 py-4' : 'bg-transparent py-6'}`}>
         <div className="max-w-7xl mx-auto flex justify-between items-center px-6">
-          <Logo variant={isScrolled ? 'dark' : 'light'} />
+          <Logo variant={isScrolled ? 'dark' : 'light'} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
           <div className="flex gap-4">
             <Link href="/login">
               <Button
                 variant="ghost"
-                className={`bg-slate-900/10 hover:bg-slate-900/20 text-white border border-white/10 backdrop-blur-sm shadow-sm transition-all hover:scale-105 ${isScrolled
+                className={`backdrop-blur-xl shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] transition-all hover:scale-105 rounded-full font-bold ${isScrolled
                   ? 'bg-slate-900/10 hover:bg-slate-900/20 text-slate-900 border border-slate-900/10'
-                  : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                  : 'bg-gradient-to-b from-white/90 via-white/60 to-white/30 border border-white/60 text-slate-900'
                   }`}
               >
                 Log in
@@ -91,11 +91,12 @@ export default function LandingPage() {
           {/* Minimal Button Group */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center animate-in fade-in slide-in-from-bottom-10 delay-300">
             <Button
+              variant="ghost"
               size="lg"
               onClick={() => setIsApplying(true)}
-              className="px-10 h-16 text-xl rounded-full bg-emerald-500/80 backdrop-blur-md border border-white/30 text-white hover:bg-emerald-500/90 shadow-[0_8px_32px_0_rgba(16,185,129,0.4)] hover:shadow-[0_8px_32px_0_rgba(16,185,129,0.6)] transition-all duration-300 hover:scale-105"
+              className="px-10 h-16 text-xl rounded-full bg-gradient-to-b from-white/90 via-white/60 to-white/30 border border-white/60 text-slate-900 font-bold backdrop-blur-xl shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] transition-all hover:scale-105"
             >
-              Start Partnership <ArrowRight className="ml-2 w-6 h-6" />
+              Start Partnership <ArrowRight className="ml-2 w-6 h-6 text-slate-900" />
             </Button>
           </div>
         </div>

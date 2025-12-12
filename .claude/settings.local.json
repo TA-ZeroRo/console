@@ -9,7 +9,8 @@
       "Bash(Copy-Item -Path \"C:\\Users\\parks\\Projects\\ZeroRo-Console\\public\\hero-image.png\" -Destination \"C:\\Users\\parks\\Projects\\ZeroRo-Console\\next_migration\\zeroro-console\\public\\hero-image.png\" -Force)",
       "Bash(Copy-Item -Path \"C:\\Users\\parks\\Projects\\ZeroRo-Console\\public\\login-image.png\" -Destination \"C:\\Users\\parks\\Projects\\ZeroRo-Console\\next_migration\\zeroro-console\\public\\login-image.png\" -Force)",
       "Bash(powershell -Command:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:atlaspuplabs.com)"
     ]
   }
 }
