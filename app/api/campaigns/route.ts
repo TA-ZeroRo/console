@@ -66,22 +66,23 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const { missions, ...campaignData } = body;
 
-    // 캠페인 생성
+    // 1. 캠페인 생성
     const { data: campaign, error: createError } = await supabase
       .from('campaigns')
       .insert({
-        title: body.title,
-        description: body.description,
+        title: campaignData.title,
+        description: campaignData.description,
         host_organizer: partner.organization_name,
-        campaign_url: body.campaign_url || `https://zeroro.io/campaigns/${Date.now()}`,
-        image_url: body.image_url,
-        start_date: body.start_date,
-        end_date: body.end_date,
-        region: body.region,
-        status: body.status || 'ACTIVE',
-        category: body.category,
-        campaign_type: body.campaign_type || 'ONLINE',
+        campaign_url: campaignData.campaign_url || `https://zeroro.io/campaigns/${Date.now()}`,
+        image_url: campaignData.image_url,
+        start_date: campaignData.start_date,
+        end_date: campaignData.end_date,
+        region: campaignData.region,
+        status: campaignData.status || 'ACTIVE',
+        category: campaignData.category,
+        campaign_type: campaignData.campaign_type || 'ONLINE',
         campaign_source: 'ZERORO',
         partner_id: partner.id,
       })
@@ -91,6 +92,31 @@ export async function POST(request: NextRequest) {
     if (createError) {
       console.error('Campaign create error:', createError);
       return NextResponse.json({ error: '캠페인 생성 실패' }, { status: 500 });
+    }
+
+    // 2. 미션 생성 (missions 배열이 있는 경우)
+    if (missions && Array.isArray(missions) && missions.length > 0) {
+      const missionInserts = missions.map((mission: any, index: number) => ({
+        campaign_id: campaign.id,
+        title: mission.title,
+        description: mission.description || null,
+        order: mission.order ?? index,
+        verification_type: mission.type || 'IMAGE',
+        reward_points: mission.points || 0,
+        success_criteria: mission.successCriteria || null,
+      }));
+
+      const { error: missionError } = await supabase
+        .from('mission_templates')
+        .insert(missionInserts);
+
+      if (missionError) {
+        console.error('Mission create error:', missionError);
+        return NextResponse.json({
+          data: campaign,
+          warning: '캠페인은 생성되었으나 미션 저장 중 오류가 발생했습니다.'
+        }, { status: 201 });
+      }
     }
 
     return NextResponse.json({ data: campaign }, { status: 201 });

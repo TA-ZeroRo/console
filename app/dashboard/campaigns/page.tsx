@@ -10,7 +10,9 @@ import {
   Trash2,
   GripVertical,
   RefreshCw,
-  Leaf
+  Leaf,
+  ImagePlus,
+  X
 } from 'lucide-react';
 import { Button, Card, CardContent, Input, Select, Badge } from '../../components/UiKit';
 import { Mission, MissionType } from '../../types';
@@ -232,6 +234,54 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
   const [campaignType, setCampaignType] = useState<'ONLINE' | 'OFFLINE'>('ONLINE');
   const [missions, setMissions] = useState<Mission[]>([]);
 
+  // Image Upload State
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Image Upload Handler
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 미리보기 생성
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // 서버에 업로드
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/campaigns/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '이미지 업로드 실패');
+      }
+
+      setImageUrl(data.url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '이미지 업로드에 실패했습니다.');
+      setImagePreview(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageUrl(null);
+    setImagePreview(null);
+  };
+
   // AI Handlers - Now using API Routes
   const handleGenerateDesc = async () => {
     if (!title) return alert("캠페인 제목을 먼저 입력해주세요.");
@@ -265,14 +315,15 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
          body: JSON.stringify({ campaignTitle: title })
        });
        const data = await response.json();
-       const suggestions: string[] = data.missions || [];
+       const suggestions: Array<string | { title: string; successCriteria?: string }> = data.missions || [];
        const newMissions = suggestions.map((s, idx) => ({
          id: `temp-${Date.now()}-${idx}`,
-         title: s,
-         description: s,
-         type: MissionType.PHOTO,
+         title: typeof s === 'string' ? s : s.title,
+         description: '',
+         type: MissionType.IMAGE,
          points: 100,
-         order: missions.length + idx
+         order: missions.length + idx,
+         successCriteria: typeof s === 'string' ? '' : (s.successCriteria || '')
        }));
        setMissions([...missions, ...newMissions]);
      } catch(e) {
@@ -303,6 +354,15 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
           category: category || null,
           campaign_type: campaignType,
           status: 'ACTIVE',
+          image_url: imageUrl,
+          missions: missions.map(m => ({
+            title: m.title,
+            description: m.description,
+            type: m.type,
+            points: m.points,
+            order: m.order,
+            successCriteria: m.successCriteria || null
+          }))
         })
       });
 
@@ -312,7 +372,11 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
         throw new Error(data.error || '캠페인 생성 실패');
       }
 
-      alert('캠페인이 성공적으로 생성되었습니다!');
+      if (data.warning) {
+        alert(`캠페인이 생성되었습니다.\n(경고: ${data.warning})`);
+      } else {
+        alert('캠페인이 성공적으로 생성되었습니다!');
+      }
       onSuccess();
     } catch (err) {
       alert(err instanceof Error ? err.message : '캠페인 생성에 실패했습니다.');
@@ -329,9 +393,10 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
         id: `m-${Date.now()}`,
         title: 'New Mission',
         description: '',
-        type: MissionType.PHOTO,
+        type: MissionType.IMAGE,
         points: 50,
-        order: missions.length
+        order: missions.length,
+        successCriteria: ''
       }
     ]);
   };
@@ -345,7 +410,7 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-200 pb-6">
         <div>
@@ -365,85 +430,192 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sidebar Steps */}
-        <div className="lg:col-span-1 space-y-1">
-           <div className={`p-4 rounded-lg cursor-pointer transition-colors ${step === 1 ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setStep(1)}>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-70">Step 01</div>
-              <div className="font-semibold">기본 정보</div>
-              <p className="text-xs mt-1 opacity-80">제목, 설명 및 기간 설정</p>
-           </div>
-           <div className={`p-4 rounded-lg cursor-pointer transition-colors ${step === 2 ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setStep(2)}>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-70">Step 02</div>
-              <div className="font-semibold">미션 빌더</div>
-              <p className="text-xs mt-1 opacity-80">참여자를 위한 미션 설정</p>
-           </div>
-        </div>
+      <div className="w-full">
+         {/* Step Indicator (Optional, simpler version) */}
+         <div className="flex items-center gap-4 mb-8 text-sm text-slate-500">
+            <div className={`flex items-center gap-2 ${step === 1 ? 'text-emerald-600 font-bold' : ''}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${step === 1 ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300'}`}>1</div>
+              기본 정보
+            </div>
+            <div className="h-px w-8 bg-slate-200"></div>
+            <div className={`flex items-center gap-2 ${step === 2 ? 'text-emerald-600 font-bold' : ''}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${step === 2 ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300'}`}>2</div>
+              미션 빌더
+            </div>
+         </div>
 
-        {/* Content */}
-        <div className="lg:col-span-2">
-           {step === 1 && (
-            <Card>
-              <CardContent className="space-y-6 p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input label="캠페인 제목" value={title} onChange={e => setTitle(e.target.value)} placeholder="예: 한강 플로깅 캠페인" />
-                  <Input label="대상 지역" value={region} onChange={e => setRegion(e.target.value)} placeholder="예: 서울, 부산" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Select
-                    label="카테고리"
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                    options={[
-                      { label: '선택하세요', value: '' },
-                      { label: '재활용', value: '재활용' },
-                      { label: '대중교통', value: '대중교통' },
-                      { label: '에너지절약', value: '에너지절약' },
-                      { label: '제로웨이스트', value: '제로웨이스트' },
-                      { label: '자연보호', value: '자연보호' },
-                      { label: '교육', value: '교육' },
-                      { label: '기타', value: '기타' },
-                    ]}
-                  />
-                  <Select
-                    label="캠페인 유형"
-                    value={campaignType}
-                    onChange={e => setCampaignType(e.target.value as 'ONLINE' | 'OFFLINE')}
-                    options={[
-                      { label: '온라인', value: 'ONLINE' },
-                      { label: '오프라인', value: 'OFFLINE' },
-                    ]}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-slate-700">캠페인 설명</label>
-                    <button
-                      onClick={handleGenerateDesc}
-                      disabled={loadingAI || !title}
-                      className="text-xs flex items-center gap-1 text-purple-600 hover:text-purple-700 font-medium disabled:opacity-50 px-2 py-1 bg-purple-50 rounded-md transition-colors"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      AI로 생성하기
-                    </button>
+         {step === 1 && (
+            <div className="space-y-6">
+              {/* 섹션 1: 캠페인 이미지 (가장 중요하므로 최상단) */}
+              <Card className="border-slate-200 shadow-sm">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                      <ImagePlus className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">대표 이미지</h3>
+                      <p className="text-sm text-slate-500">캠페인을 대표할 매력적인 이미지를 등록해주세요.</p>
+                    </div>
                   </div>
-                  <textarea
-                    className="w-full h-32 rounded-md border border-slate-200 bg-white p-3 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all placeholder:text-slate-400"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="캠페인의 목표와 세부 내용을 설명해주세요..."
-                  />
+
+                  <div className="bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center hover:bg-slate-100/50 transition-colors">
+                    {imagePreview ? (
+                      <div className="relative inline-block group">
+                        <img
+                          src={imagePreview}
+                          alt="캠페인 이미지 미리보기"
+                          className="max-h-[400px] w-auto mx-auto rounded-lg shadow-md object-contain"
+                        />
+                        {isUploading && (
+                          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                            <RefreshCw className="w-8 h-8 text-white animate-spin" />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute -top-3 -right-3 bg-white text-red-500 border border-slate-200 rounded-full p-2 shadow-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center cursor-pointer py-12">
+                        <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-emerald-600">
+                          <ImagePlus className="w-8 h-8" />
+                        </div>
+                        <span className="text-lg font-medium text-slate-900 mb-1">이미지를 드래그하거나 클릭하여 업로드</span>
+                        <span className="text-sm text-slate-500">JPG, PNG, WEBP (최대 5MB)</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/jpg,image/webp"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* 섹션 2: 기본 정보 (제목, 설명) - 좌측/상단 배치 */}
+                <div className="lg:col-span-2 space-y-6">
+                  <Card className="h-full border-slate-200 shadow-sm">
+                    <CardContent className="p-8">
+                      <div className="flex items-center gap-2 mb-6">
+                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                          <Leaf className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900">기본 정보</h3>
+                          <p className="text-sm text-slate-500">캠페인의 핵심 내용을 작성해주세요.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <Input 
+                          label="캠페인 제목" 
+                          value={title} 
+                          onChange={e => setTitle(e.target.value)} 
+                          placeholder="참여를 유도할 수 있는 매력적인 제목을 입력하세요" 
+                          className="text-lg"
+                        />
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <label className="text-sm font-medium text-slate-700">캠페인 설명</label>
+                            <button
+                              onClick={handleGenerateDesc}
+                              disabled={loadingAI || !title}
+                              className="text-xs flex items-center gap-1 text-purple-600 hover:text-purple-700 font-medium disabled:opacity-50 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors"
+                            >
+                              <Sparkles className="w-3 h-3" />
+                              AI 자동 생성
+                            </button>
+                          </div>
+                          <textarea
+                            className="w-full h-48 rounded-lg border border-slate-200 bg-white p-4 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all placeholder:text-slate-400 resize-none leading-relaxed"
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            placeholder="캠페인의 목적, 참여 방법, 기대 효과 등을 상세히 설명해주세요..."
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-50">
-                   <Input type="date" label="시작일" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                   <Input type="date" label="종료일" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                {/* 섹션 3: 상세 설정 (지역, 기간, 유형 등) - 우측/하단 배치 */}
+                <div className="lg:col-span-1 space-y-6">
+                  <Card className="h-full border-slate-200 shadow-sm">
+                    <CardContent className="p-8">
+                      <div className="flex items-center gap-2 mb-6">
+                        <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
+                          <MapPin className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900">상세 설정</h3>
+                          <p className="text-sm text-slate-500">운영 정보를 설정하세요.</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-5">
+                        <Input 
+                          label="대상 지역" 
+                          value={region} 
+                          onChange={e => setRegion(e.target.value)} 
+                          placeholder="예: 서울특별시 마포구" 
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="col-span-2">
+                            <Select
+                              label="카테고리"
+                              value={category}
+                              onChange={e => setCategory(e.target.value)}
+                              options={[
+                                { label: '선택하세요', value: '' },
+                                { label: '재활용', value: '재활용' },
+                                { label: '대중교통', value: '대중교통' },
+                                { label: '에너지절약', value: '에너지절약' },
+                                { label: '제로웨이스트', value: '제로웨이스트' },
+                                { label: '자연보호', value: '자연보호' },
+                                { label: '교육', value: '교육' },
+                                { label: '기타', value: '기타' },
+                              ]}
+                            />
+                           </div>
+                           <div className="col-span-2">
+                            <Select
+                              label="진행 방식"
+                              value={campaignType}
+                              onChange={e => setCampaignType(e.target.value as 'ONLINE' | 'OFFLINE')}
+                              options={[
+                                { label: '온라인', value: 'ONLINE' },
+                                { label: '오프라인', value: 'OFFLINE' },
+                              ]}
+                            />
+                           </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-100 space-y-4">
+                          <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-slate-400" /> 운영 기간
+                          </label>
+                          <div className="grid grid-cols-1 gap-4">
+                            <Input type="date" label="시작일" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                            <Input type="date" label="종료일" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </div>
+         )}
 
           {step === 2 && (
             <div className="space-y-6">
@@ -478,8 +650,9 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
                             <label className="text-xs font-medium text-slate-500 mb-1 block">인증 방식</label>
                             <Select
                               options={[
-                                { label: '사진 인증', value: MissionType.PHOTO },
+                                { label: '사진 인증', value: MissionType.IMAGE },
                                 { label: '퀴즈', value: MissionType.QUIZ },
+                                { label: '소감문', value: MissionType.TEXT_REVIEW },
                                 { label: '위치 인증', value: MissionType.LOCATION },
                               ]}
                               value={mission.type}
@@ -505,6 +678,17 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
                           className="bg-slate-50"
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-medium text-slate-500 mb-1 block">
+                          처리요건 <span className="text-slate-400 font-normal">(성공 기준, 옵션)</span>
+                        </label>
+                        <Input
+                          value={mission.successCriteria || ''}
+                          onChange={(e) => updateMission(mission.id, 'successCriteria', e.target.value)}
+                          placeholder="예: 쓰레기 3개 이상이 보이는 사진, 나무가 포함된 사진"
+                          className="bg-slate-50"
+                        />
+                      </div>
                     </div>
 
                     <button
@@ -522,7 +706,6 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
               </Button>
             </div>
           )}
-        </div>
       </div>
     </div>
   );

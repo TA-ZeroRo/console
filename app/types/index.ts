@@ -11,10 +11,10 @@ export enum CampaignStatus {
 }
 
 export enum MissionType {
-  PHOTO = 'PHOTO',
+  IMAGE = 'IMAGE',
   QUIZ = 'QUIZ',
+  TEXT_REVIEW = 'TEXT_REVIEW',
   LOCATION = 'LOCATION',
-  TEXT = 'TEXT',
 }
 
 export interface Mission {
@@ -24,6 +24,7 @@ export interface Mission {
   type: MissionType;
   points: number;
   order: number;
+  successCriteria?: string;
 }
 
 export interface Campaign {
