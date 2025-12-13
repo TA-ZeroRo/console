@@ -99,15 +99,84 @@ export const Select: React.FC<SelectProps> = ({ label, options, className = '', 
 );
 
 // --- Badge ---
-export const Badge: React.FC<{ children: React.ReactNode; variant?: 'success' | 'warning' | 'default' }> = ({ children, variant = 'default' }) => {
+export const Badge: React.FC<{ children: React.ReactNode; variant?: 'success' | 'warning' | 'default' | 'info' | 'error' }> = ({ children, variant = 'default' }) => {
   const styles = {
     success: "bg-emerald-50 text-emerald-700 border-emerald-200",
     warning: "bg-amber-50 text-amber-700 border-amber-200",
     default: "bg-slate-100 text-slate-700 border-slate-200",
+    info: "bg-blue-50 text-blue-700 border-blue-200",
+    error: "bg-red-50 text-red-700 border-red-200",
   };
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[variant]}`}>
       {children}
     </span>
+  );
+};
+
+// --- Textarea ---
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+}
+
+export const Textarea: React.FC<TextareaProps> = ({ label, className = '', ...props }) => (
+  <div className="space-y-2 w-full">
+    {label && <label className="text-sm font-medium text-slate-700 block">{label}</label>}
+    <textarea
+      className={`flex min-h-[100px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:cursor-not-allowed disabled:opacity-50 resize-none ${className}`}
+      {...props}
+    />
+  </div>
+);
+
+// --- FileInput ---
+interface FileInputProps {
+  label?: string;
+  accept?: string;
+  onChange?: (file: File | null) => void;
+  className?: string;
+  hint?: string;
+}
+
+export const FileInput: React.FC<FileInputProps> = ({ label, accept, onChange, className = '', hint }) => {
+  const [fileName, setFileName] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFileName(file?.name || null);
+    onChange?.(file);
+  };
+
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+
+  return (
+    <div className={`space-y-2 w-full ${className}`}>
+      {label && <label className="text-sm font-medium text-slate-700 block">{label}</label>}
+      <div
+        onClick={handleClick}
+        className="flex items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all"
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          onChange={handleChange}
+          className="hidden"
+        />
+        <div className="text-center">
+          {fileName ? (
+            <p className="text-sm text-emerald-600 font-medium">{fileName}</p>
+          ) : (
+            <>
+              <p className="text-sm text-slate-500">클릭하여 파일 업로드</p>
+              {hint && <p className="text-xs text-slate-400 mt-1">{hint}</p>}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

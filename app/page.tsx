@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle, ArrowRight, Activity, ShieldCheck, Zap, Map, Navigation } from 'lucide-react';
-import { Button, Input } from './components/UiKit';
+import { CheckCircle, ArrowRight, Activity, ShieldCheck, Zap, Map, Navigation, Loader2, AlertCircle } from 'lucide-react';
+import { Button, Input, FileInput } from './components/UiKit';
 import { LiquidGlassTitle } from './components/LiquidGlassTitle';
 import { Logo } from './components/Logo';
 
@@ -13,10 +13,28 @@ const GlassCard: React.FC<{ children: React.ReactNode; className?: string }> = (
   </div>
 );
 
+interface FormData {
+  organization_name: string;
+  contact_name: string;
+  phone: string;
+  email: string;
+  organization_type: string;
+}
+
 export default function LandingPage() {
   const [isApplying, setIsApplying] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [businessFile, setBusinessFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    organization_name: '',
+    contact_name: '',
+    phone: '',
+    email: '',
+    organization_type: 'Government',
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,12 +44,70 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTimeout(() => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      let businessRegistrationUrl: string | undefined;
+
+      // 파일 업로드 (선택사항)
+      if (businessFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', businessFile);
+
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadRes.ok) {
+          const uploadError = await uploadRes.json();
+          throw new Error(uploadError.error || '파일 업로드에 실패했습니다.');
+        }
+
+        const uploadData = await uploadRes.json();
+        businessRegistrationUrl = uploadData.url;
+      }
+
+      // 신청 제출
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          business_registration_url: businessRegistrationUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || '신청 처리 중 오류가 발생했습니다.');
+      }
+
       setFormSubmitted(true);
       setIsApplying(false);
-    }, 1000);
+      // 폼 초기화
+      setFormData({
+        organization_name: '',
+        contact_name: '',
+        phone: '',
+        email: '',
+        organization_type: 'Government',
+      });
+      setBusinessFile(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -125,8 +201,73 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* App Feature Showcase: Plogging Map */}
+      {/* App Feature Showcase: AI Agent */}
       <section className="py-24 relative overflow-hidden bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Text Side */}
+            <div className="order-1 relative z-10 space-y-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 text-emerald-600 font-bold tracking-wider text-sm uppercase">
+                  <Zap className="w-4 h-4" />
+                  Core Technology
+                </div>
+                <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
+                  Meet Your <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">AI Eco-Assistant.</span>
+                </h3>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  Powered by advanced Gemini models, our AI agent works 24/7 to streamline your operations.
+                  From instant mission verification to predictive analytics, get the insights you need to drive real change.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[
+                  { icon: ShieldCheck, title: "Auto-Verification", desc: "Instantly validate user submissions with computer vision." },
+                  { icon: Activity, title: "Data Insights", desc: "Turn raw metrics into actionable environmental strategies." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 items-start">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                      <item.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">{item.title}</h4>
+                      <p className="text-sm text-slate-600 mt-1">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual Side */}
+            <div className="order-2 relative group">
+              {/* Decorative background blob */}
+              <div className="absolute -inset-4 bg-gradient-to-l from-emerald-300 to-blue-300 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
+              
+              <GlassCard className="relative overflow-hidden p-3 border-white/60 shadow-2xl -rotate-1 hover:rotate-0 transition-transform duration-500">
+                 <div className="rounded-xl overflow-hidden bg-[#F5F5F7] relative aspect-[4/3]">
+                    <img 
+                      src="/agent.jpg" 
+                      alt="ZeroRo AI Agent Interface" 
+                      className="relative z-10 w-full h-full object-contain"
+                    />
+                    {/* Overlay UI Mockup Elements */}
+                    <div className="absolute top-4 right-4 z-20">
+                      <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold shadow-lg flex items-center gap-2 border border-emerald-100">
+                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                         AI Analysis Complete
+                      </div>
+                    </div>
+                 </div>
+              </GlassCard>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* App Feature Showcase: Plogging Map */}
+      <section className="py-24 relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Visual Side */}
@@ -220,7 +361,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Application Modal (Preserved functionality, updated style) */}
+      {/* Application Modal (입점 신청 모달) */}
       {(isApplying || formSubmitted) && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <GlassCard className="w-full max-w-lg relative animate-in fade-in zoom-in duration-300 shadow-2xl border border-white/50 bg-white/70">
@@ -229,35 +370,108 @@ export default function LandingPage() {
                 <div className="w-16 h-16 bg-emerald-100/50 backdrop-blur-sm text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-200">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900">Application Sent</h2>
-                <p className="text-slate-700">We will review your organization details and contact you at the provided email within 24 hours.</p>
-                <Button onClick={() => setFormSubmitted(false)} className="w-full mt-4 bg-slate-900/90 hover:bg-slate-800 text-white shadow-lg">Close</Button>
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900">신청이 완료되었습니다</h2>
+                <p className="text-slate-700">입력하신 이메일로 심사 결과를 안내해 드리겠습니다. 심사에는 1-2 영업일이 소요됩니다.</p>
+                <Button onClick={() => setFormSubmitted(false)} className="w-full mt-4 bg-slate-900/90 hover:bg-slate-800 text-white shadow-lg">닫기</Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Partner Application</h2>
-                  <p className="text-slate-600 text-sm mt-1">Join the network of sustainable organizations.</p>
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">파트너 입점 신청</h2>
+                  <p className="text-slate-600 text-sm mt-1">환경 캠페인 네트워크에 참여하세요.</p>
                 </div>
-                <div className="space-y-4">
-                  <Input label="Organization Name" required placeholder="e.g. Green Seoul" className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input label="Contact Name" required className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all" />
-                    <Input label="Phone" required className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all" />
+
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    {error}
                   </div>
-                  <Input label="Work Email" type="email" required placeholder="manager@org.com" className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all" />
+                )}
+
+                <div className="space-y-4">
+                  <Input
+                    label="단체명"
+                    name="organization_name"
+                    value={formData.organization_name}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="예: 서울시 환경재단"
+                    className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="담당자명"
+                      name="contact_name"
+                      value={formData.contact_name}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="홍길동"
+                      className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all"
+                    />
+                    <Input
+                      label="연락처"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="010-1234-5678"
+                      className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all"
+                    />
+                  </div>
+                  <Input
+                    label="업무용 이메일"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="manager@organization.kr"
+                    className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80 transition-all"
+                  />
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Organization Type</label>
-                    <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:outline-none backdrop-blur-sm">
-                      <option>Government / Local Authority</option>
-                      <option>NGO / Non-Profit</option>
-                      <option>Corporate CSR</option>
+                    <label className="text-sm font-medium text-slate-700">단체 유형</label>
+                    <select
+                      name="organization_type"
+                      value={formData.organization_type}
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:outline-none backdrop-blur-sm"
+                    >
+                      <option value="Government">지자체 / 공공기관</option>
+                      <option value="NGO">비영리단체 / NGO</option>
+                      <option value="Corporate">기업 CSR</option>
                     </select>
                   </div>
+                  <FileInput
+                    label="사업자등록증 (선택)"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={setBusinessFile}
+                    hint="PDF, JPG, PNG (최대 5MB)"
+                  />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="ghost" onClick={() => setIsApplying(false)} className="flex-1 hover:bg-white/40">Cancel</Button>
-                  <Button type="submit" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white shadow-lg">Submit Application</Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { setIsApplying(false); setError(null); }}
+                    className="flex-1 hover:bg-white/40"
+                    disabled={isSubmitting}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white shadow-lg"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        처리 중...
+                      </>
+                    ) : (
+                      '신청하기'
+                    )}
+                  </Button>
                 </div>
               </form>
             )}
