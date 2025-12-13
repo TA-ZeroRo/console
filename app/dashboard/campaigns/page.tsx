@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   MoreHorizontal,
@@ -12,7 +13,8 @@ import {
   RefreshCw,
   Leaf,
   ImagePlus,
-  X
+  X,
+  ChevronRight
 } from 'lucide-react';
 import { Button, Card, CardContent, Input, Select, Badge } from '../../components/UiKit';
 import { Mission, MissionType } from '../../types';
@@ -36,6 +38,7 @@ interface CampaignData {
 }
 
 export default function CampaignsPage() {
+  const router = useRouter();
   const [view, setView] = useState<'list' | 'create'>('list');
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +81,7 @@ export default function CampaignsPage() {
           error={error}
           onRefresh={fetchCampaigns}
           onViewCreate={() => setView('create')}
+          onCampaignClick={(id) => router.push(`/dashboard/campaigns/${id}`)}
         />
       ) : (
         <CampaignBuilder onCancel={() => setView('list')} onSuccess={handleCampaignCreated} />
@@ -93,6 +97,7 @@ interface CampaignListProps {
   error: string | null;
   onRefresh: () => void;
   onViewCreate: () => void;
+  onCampaignClick: (id: number) => void;
 }
 
 const CampaignList: React.FC<CampaignListProps> = ({
@@ -100,7 +105,8 @@ const CampaignList: React.FC<CampaignListProps> = ({
   isLoading,
   error,
   onRefresh,
-  onViewCreate
+  onViewCreate,
+  onCampaignClick
 }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -171,7 +177,11 @@ const CampaignList: React.FC<CampaignListProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {campaigns.map((campaign) => (
-                  <tr key={campaign.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <tr
+                    key={campaign.id}
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                    onClick={() => onCampaignClick(campaign.id)}
+                  >
                     <td className="px-6 py-5">
                       <div className="font-semibold text-slate-900 text-base mb-1">{campaign.title}</div>
                       <div className="text-xs text-slate-500 truncate max-w-[300px] flex items-center gap-1">
@@ -198,9 +208,7 @@ const CampaignList: React.FC<CampaignListProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <button className="text-slate-400 hover:text-slate-900 p-2 rounded-full hover:bg-slate-100 transition-colors">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
+                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
                     </td>
                   </tr>
                 ))}
