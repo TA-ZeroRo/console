@@ -35,11 +35,11 @@ export default function AuthConfirmPage() {
           }
 
           setStatus('success');
-          setMessage('인증이 완료되었습니다! 잠시 후 이동합니다...');
+          setMessage('인증이 완료되었습니다! 비밀번호를 설정해주세요.');
 
-          // 잠시 후 대시보드로 이동 (또는 비밀번호 설정 페이지)
+          // 잠시 후 비밀번호 설정 페이지로 이동
           setTimeout(() => {
-            router.push('/dashboard');
+            router.push('/auth/set-password');
           }, 1500);
           return;
         }

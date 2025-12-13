@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Filter, RefreshCw, ChevronLeft, ChevronRight, Building2, Mail, Phone } from 'lucide-react';
 import { Button } from '@/app/components/UiKit';
@@ -35,7 +35,7 @@ const statusLabels: Record<string, { label: string; className: string }> = {
   suspended: { label: '정지', className: 'bg-red-100 text-red-700' },
 };
 
-export default function PartnersPage() {
+function PartnersContent() {
   const searchParams = useSearchParams();
   const secret = searchParams.get('secret') || '';
 
@@ -250,5 +250,24 @@ export default function PartnersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PartnersPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-slate-200 rounded w-1/3 mb-8"></div>
+          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-500">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>로딩 중...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <PartnersContent />
+    </Suspense>
   );
 }

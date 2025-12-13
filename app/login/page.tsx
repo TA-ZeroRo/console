@@ -1,25 +1,54 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/app/lib/supabase/client';
 import { Button, Input } from '../components/UiKit';
 import { Logo } from '../components/Logo';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'password-set') {
+      setSuccessMessage('비밀번호가 설정되었습니다. 로그인해주세요.');
+    } else if (message === 'password-reset') {
+      setSuccessMessage('비밀번호가 재설정되었습니다. 로그인해주세요.');
+    }
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setSuccessMessage('');
     setLoading(true);
-    // Simulate auth
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setLoading(false);
+        return;
+      }
+
       router.push('/dashboard');
-    }, 800);
+    } catch (err) {
+      setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -53,6 +82,12 @@ export default function LoginPage() {
             <p className="text-slate-500 text-sm">Enter the credentials provided by your Zeroro manager.</p>
           </div>
 
+          {successMessage && (
+            <div className="text-emerald-600 text-sm bg-emerald-50 p-3 rounded-lg">
+              {successMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Work Email"
@@ -69,9 +104,22 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               required
             />
+
+            {error && (
+              <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-emerald-500/20" isLoading={loading}>
               Sign In to Console
             </Button>
+
+            <div className="text-center">
+              <Link href="/auth/reset-password" className="text-sm text-slate-500 hover:text-emerald-600 font-medium">
+                비밀번호를 잊으셨나요?
+              </Link>
+            </div>
           </form>
 
           <div className="text-center pt-4">
@@ -82,5 +130,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

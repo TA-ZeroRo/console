@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, Eye, MoreHorizontal, Building2, User, Mail, Calendar } from 'lucide-react';
@@ -42,7 +42,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-export default function AdminApplicationsPage() {
+function AdminApplicationsContent() {
   const searchParams = useSearchParams();
   const secret = searchParams.get('secret') || '';
 
@@ -273,5 +273,20 @@ export default function AdminApplicationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminApplicationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg border border-slate-200 border-dashed">
+          <RefreshCw className="w-8 h-8 animate-spin text-indigo-400 mb-4" />
+          <p className="text-slate-500 font-medium">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AdminApplicationsContent />
+    </Suspense>
   );
 }
