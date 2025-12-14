@@ -151,7 +151,7 @@ export const exportToPDF = async (data: DashboardOverview) => {
   // Title (폰트 설정 후 텍스트 출력)
   doc.setFont(fontName, 'normal');
   doc.setFontSize(20);
-  doc.text('대시보드 리포트', 105, 20, { align: 'center' });
+  doc.text('환경 영향 보고서', 105, 20, { align: 'center' });
   doc.setFontSize(10);
   doc.text(`생성일: ${new Date().toLocaleString('ko-KR')}`, 105, 28, { align: 'center' });
 
@@ -174,6 +174,9 @@ export const exportToPDF = async (data: DashboardOverview) => {
   ];
 
   // 3) autoTable에도 폰트를 지정해야 함 (styles, headStyles, bodyStyles 모두)
+  // 페이지 너비에서 margin을 뺀 후 반반으로 나눔 (595.28 - 40) / 2 = 277.64
+  const tableWidth = doc.internal.pageSize.width - 40; // margin left + right
+  const columnWidth = tableWidth / 2;
   autoTable(doc, {
     startY: yPos,
     head: [['항목', '값']],
@@ -191,6 +194,10 @@ export const exportToPDF = async (data: DashboardOverview) => {
     styles: {
       font: fontName,
       fontStyle: 'normal'
+    },
+    columnStyles: {
+      0: { cellWidth: columnWidth },
+      1: { cellWidth: columnWidth }
     },
     margin: { left: 20, right: 20 }
   });
@@ -211,13 +218,15 @@ export const exportToPDF = async (data: DashboardOverview) => {
       ['완료율', `${data.topCampaign.completionRate}%`]
     ];
 
+    const tableWidth2 = doc.internal.pageSize.width - 40;
+    const columnWidth2 = tableWidth2 / 2;
     autoTable(doc, {
       startY: yPos,
       head: [['속성', '값']],
       body: campaignData,
       theme: 'grid',
       headStyles: { 
-        fillColor: [245, 158, 11],
+        fillColor: [16, 185, 129],
         font: fontName,
         fontStyle: 'normal'
       },
@@ -228,6 +237,10 @@ export const exportToPDF = async (data: DashboardOverview) => {
       styles: {
         font: fontName,
         fontStyle: 'normal'
+      },
+      columnStyles: {
+        0: { cellWidth: columnWidth2 },
+        1: { cellWidth: columnWidth2 }
       },
       margin: { left: 20, right: 20 }
     });
@@ -251,13 +264,15 @@ export const exportToPDF = async (data: DashboardOverview) => {
     item.participants.toString()
   ]);
 
+  const tableWidth3 = doc.internal.pageSize.width - 40;
+  const columnWidth3 = tableWidth3 / 2;
   autoTable(doc, {
     startY: yPos,
     head: [['카테고리', '참여자 수']],
     body: categoryData,
     theme: 'grid',
     headStyles: { 
-      fillColor: [139, 92, 246],
+      fillColor: [16, 185, 129],
       font: fontName,
       fontStyle: 'normal'
     },
@@ -268,6 +283,10 @@ export const exportToPDF = async (data: DashboardOverview) => {
     styles: {
       font: fontName,
       fontStyle: 'normal'
+    },
+    columnStyles: {
+      0: { cellWidth: columnWidth3 },
+      1: { cellWidth: columnWidth3 }
     },
     margin: { left: 20, right: 20 }
   });
@@ -280,7 +299,16 @@ export const exportToPDF = async (data: DashboardOverview) => {
 
   doc.setFont(fontName, 'normal');
   doc.setFontSize(14);
-  doc.text('주간 참여자 추이', 20, yPos);
+  
+  // 날짜 범위 계산
+  let dateRangeText = '주간 참여자 추이';
+  if (data.weeklyTrend && data.weeklyTrend.length > 0) {
+    const firstDate = data.weeklyTrend[0].date;
+    const lastDate = data.weeklyTrend[data.weeklyTrend.length - 1].date;
+    dateRangeText = `주간 참여자 추이 (${firstDate} ~ ${lastDate})`;
+  }
+  
+  doc.text(dateRangeText, 20, yPos);
   yPos += 10;
 
   const trendData = data.weeklyTrend.map(item => [
@@ -288,6 +316,8 @@ export const exportToPDF = async (data: DashboardOverview) => {
     item.participants.toString()
   ]);
 
+  const tableWidth4 = doc.internal.pageSize.width - 40;
+  const columnWidth4 = tableWidth4 / 2;
   autoTable(doc, {
     startY: yPos,
     head: [['날짜', '참여자 수']],
@@ -305,6 +335,10 @@ export const exportToPDF = async (data: DashboardOverview) => {
     styles: {
       font: fontName,
       fontStyle: 'normal'
+    },
+    columnStyles: {
+      0: { cellWidth: columnWidth4 },
+      1: { cellWidth: columnWidth4 }
     },
     margin: { left: 20, right: 20 }
   });
