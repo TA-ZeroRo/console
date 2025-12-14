@@ -159,7 +159,7 @@ export const exportToPDF = async (data: DashboardOverview) => {
 
   // Main KPIs
   doc.setFont(fontName, 'normal');
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.text('주요 지표', 20, yPos);
   yPos += 10;
 
@@ -207,7 +207,7 @@ export const exportToPDF = async (data: DashboardOverview) => {
   // Top Campaign
   if (data.topCampaign) {
     doc.setFont(fontName, 'normal');
-    doc.setFontSize(14);
+    doc.setFontSize(16);
     doc.text('최고 성과 캠페인', 20, yPos);
     yPos += 10;
 
@@ -255,7 +255,7 @@ export const exportToPDF = async (data: DashboardOverview) => {
   }
 
   doc.setFont(fontName, 'normal');
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.text('카테고리별 참여자 분포', 20, yPos);
   yPos += 10;
 
@@ -298,7 +298,7 @@ export const exportToPDF = async (data: DashboardOverview) => {
   yPos = 20;
 
   doc.setFont(fontName, 'normal');
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   
   // 날짜 범위 계산
   let dateRangeText = '주간 참여자 추이';
