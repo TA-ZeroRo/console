@@ -80,9 +80,8 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, onClick, clickable,
 
   return (
     <div
-      className={`relative overflow-hidden rounded-lg ${scheme.border ? `bg-${scheme.bg} backdrop-blur border border-slate-600` : `bg-gradient-to-br ${scheme.bg}`} p-5 shadow-xl transition-all duration-300 ${
-        clickable ? 'cursor-pointer hover:scale-105 hover:shadow-2xl group' : 'hover:scale-102'
-      }`}
+      className={`relative overflow-hidden rounded-lg ${scheme.border ? `bg-${scheme.bg} backdrop-blur border border-slate-600` : `bg-gradient-to-br ${scheme.bg}`} p-5 shadow-xl transition-all duration-300 ${clickable ? 'cursor-pointer hover:scale-105 hover:shadow-2xl group' : 'hover:scale-102'
+        }`}
       onClick={onClick}
     >
       {clickable && (
@@ -223,71 +222,71 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            환경 영향 대시보드
+            환경 영향 보고서
           </h1>
-          <p className="text-slate-300 mt-1 text-sm">실시간 환경 캠페인 성과 분석 센터</p>
+          <p className="text-slate-300 mt-1 text-sm">실시간 환경 캠페인 성과 분석</p>
         </div>
         <div className="flex gap-3">
-           <div className="relative">
-             <select className="h-10 rounded-lg border border-slate-600 bg-slate-700/50 backdrop-blur pl-4 pr-10 text-sm font-medium text-white hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all cursor-pointer appearance-none">
-               <option className="bg-slate-800">최근 7일</option>
-               <option className="bg-slate-800">최근 30일</option>
-               <option className="bg-slate-800">올해</option>
-             </select>
-             <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
-           </div>
+          <div className="relative">
+            <select className="h-10 rounded-lg border border-slate-600 bg-slate-700/50 backdrop-blur pl-4 pr-10 text-sm font-medium text-white hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all cursor-pointer appearance-none">
+              <option className="bg-slate-800">최근 7일</option>
+              <option className="bg-slate-800">최근 30일</option>
+              <option className="bg-slate-800">올해</option>
+            </select>
+            <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
+          </div>
 
-           {/* Export Dropdown */}
-           <div className="relative" ref={exportDropdownRef}>
-             <button
-               onClick={() => setShowExportDropdown(!showExportDropdown)}
-               className="h-10 px-5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-bold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-emerald-500/50 flex items-center gap-2"
-             >
-               <Download className="w-4 h-4" />
-               내보내기
-               <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showExportDropdown ? 'rotate-180' : ''}`} />
-             </button>
+          {/* Export Dropdown */}
+          <div className="relative" ref={exportDropdownRef}>
+            <button
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              className="h-10 px-5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-bold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg hover:shadow-emerald-500/50 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              내보내기
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showExportDropdown ? 'rotate-180' : ''}`} />
+            </button>
 
-             {/* Dropdown Menu */}
-             {showExportDropdown && (
-               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
-                 <div className="py-1">
-                   <button
-                     onClick={() => handleExport('pdf')}
-                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
-                   >
-                     <FileText className="w-4 h-4 text-slate-600" />
-                     <div className="text-left flex-1">
-                       <p className="text-sm font-semibold text-slate-900">PDF 파일</p>
-                       <p className="text-xs text-slate-500">전문적인 보고서 형식</p>
-                     </div>
-                   </button>
+            {/* Dropdown Menu */}
+            {showExportDropdown && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                <div className="py-1">
+                  <button
+                    onClick={() => handleExport('pdf')}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
+                  >
+                    <FileText className="w-4 h-4 text-slate-600" />
+                    <div className="text-left flex-1">
+                      <p className="text-sm font-semibold text-slate-900">PDF 파일</p>
+                      <p className="text-xs text-slate-500">전문적인 보고서 형식</p>
+                    </div>
+                  </button>
 
-                   <button
-                     onClick={() => handleExport('csv')}
-                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
-                   >
-                     <FileSpreadsheet className="w-4 h-4 text-slate-600" />
-                     <div className="text-left flex-1">
-                       <p className="text-sm font-semibold text-slate-900">CSV 파일</p>
-                       <p className="text-xs text-slate-500">엑셀에서 열기 가능</p>
-                     </div>
-                   </button>
+                  <button
+                    onClick={() => handleExport('csv')}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-slate-600" />
+                    <div className="text-left flex-1">
+                      <p className="text-sm font-semibold text-slate-900">CSV 파일</p>
+                      <p className="text-xs text-slate-500">엑셀에서 열기 가능</p>
+                    </div>
+                  </button>
 
-                   <button
-                     onClick={() => handleExport('hwp')}
-                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
-                   >
-                     <FileText className="w-4 h-4 text-slate-600" />
-                     <div className="text-left flex-1">
-                       <p className="text-sm font-semibold text-slate-900">HWP 파일</p>
-                       <p className="text-xs text-slate-500">한글 문서 형식</p>
-                     </div>
-                   </button>
-                 </div>
-               </div>
-             )}
-           </div>
+                  <button
+                    onClick={() => handleExport('hwp')}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors"
+                  >
+                    <FileText className="w-4 h-4 text-slate-600" />
+                    <div className="text-left flex-1">
+                      <p className="text-sm font-semibold text-slate-900">HWP 파일</p>
+                      <p className="text-xs text-slate-500">한글 문서 형식</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -413,27 +412,27 @@ export default function DashboardPage() {
             <h3 className="text-lg font-bold text-white">주간 참여자 추이</h3>
           </div>
           <div className="bg-slate-800/50 rounded-lg p-4">
-             <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={weeklyTrendFormatted} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorParticipants" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
-                    <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                      itemStyle={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}
-                      cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    />
-                    <Area type="monotone" dataKey="participants" stroke="#14b8a6" strokeWidth={2} fillOpacity={1} fill="url(#colorParticipants)" />
-                  </AreaChart>
-             </ResponsiveContainer>
-             </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={weeklyTrendFormatted} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorParticipants" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
+                  <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}
+                    cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  />
+                  <Area type="monotone" dataKey="participants" stroke="#14b8a6" strokeWidth={2} fillOpacity={1} fill="url(#colorParticipants)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -581,13 +580,12 @@ export default function DashboardPage() {
                           >
                             <div className="flex justify-between items-start mb-3">
                               <h4 className="font-semibold text-slate-900">{campaign.title}</h4>
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                campaign.completionRate >= 70
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${campaign.completionRate >= 70
                                   ? 'bg-emerald-100 text-emerald-700'
                                   : campaign.completionRate >= 40
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}>
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
                                 {campaign.completionRate}% 완료
                               </span>
                             </div>
@@ -659,26 +657,24 @@ export default function DashboardPage() {
                   {campaignRankings.rankings.map((campaign: any, index: number) => (
                     <div
                       key={campaign.id}
-                      className={`relative rounded-xl p-5 transition-all hover:scale-[1.02] ${
-                        index === 0
+                      className={`relative rounded-xl p-5 transition-all hover:scale-[1.02] ${index === 0
                           ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 shadow-lg'
                           : index === 1
-                          ? 'bg-gradient-to-r from-slate-50 to-gray-50 border-2 border-slate-300'
-                          : index === 2
-                          ? 'bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300'
-                          : 'bg-white border-2 border-slate-200'
-                      }`}
+                            ? 'bg-gradient-to-r from-slate-50 to-gray-50 border-2 border-slate-300'
+                            : index === 2
+                              ? 'bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300'
+                              : 'bg-white border-2 border-slate-200'
+                        }`}
                     >
                       {/* Rank Badge */}
-                      <div className={`absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${
-                        index === 0
+                      <div className={`absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${index === 0
                           ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
                           : index === 1
-                          ? 'bg-gradient-to-br from-slate-400 to-gray-500'
-                          : index === 2
-                          ? 'bg-gradient-to-br from-orange-400 to-amber-500'
-                          : 'bg-gradient-to-br from-slate-300 to-slate-400'
-                      }`}>
+                            ? 'bg-gradient-to-br from-slate-400 to-gray-500'
+                            : index === 2
+                              ? 'bg-gradient-to-br from-orange-400 to-amber-500'
+                              : 'bg-gradient-to-br from-slate-300 to-slate-400'
+                        }`}>
                         {index + 1}
                       </div>
 

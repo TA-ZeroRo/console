@@ -196,7 +196,7 @@ export default function LandingPage() {
 
           <p className="text-xl md:text-2xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             정부 및 NGO를 위한 올인원 콘솔. <br />
-            캠페인 런칭, 실시간 ESG 데이터 추적, AI 미션 검증까지.
+            캠페인 런칭, 실시간 데이터 추적, AI 미션 검증까지.
           </p>
         </div>
       </section>
@@ -213,7 +213,7 @@ export default function LandingPage() {
                   핵심 기술
                 </div>
                 <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
-                  만나보세요, <br/>
+                  만나보세요, <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">AI 에코 어시스턴트.</span>
                 </h3>
                 <p className="text-lg text-slate-600 leading-relaxed">
@@ -224,8 +224,8 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
-                  { icon: ShieldCheck, title: "자동 검증", desc: "컴퓨터 비전으로 사용자 제출물을 즉시 검증합니다." },
-                  { icon: Activity, title: "데이터 인사이트", desc: "원시 데이터를 실행 가능한 환경 전략으로 전환합니다." }
+                  { icon: ShieldCheck, title: "자동 검증", desc: "AI 에이전트가 사용자 제출물을 즉시 검증합니다." },
+                  { icon: Activity, title: "데이터 인사이트", desc: "데이터를 실행 가능한 환경 전략으로 전환합니다." }
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 items-start">
                     <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
@@ -244,22 +244,22 @@ export default function LandingPage() {
             <div className="order-2 relative group">
               {/* Decorative background blob */}
               <div className="absolute -inset-4 bg-gradient-to-l from-emerald-300 to-blue-300 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
-              
+
               <GlassCard className="relative overflow-hidden p-3 border-white/60 shadow-2xl -rotate-1 hover:rotate-0 transition-transform duration-500">
-                 <div className="rounded-xl overflow-hidden bg-[#F5F5F7] relative aspect-[4/3]">
-                    <img 
-                      src="/agent.jpg" 
-                      alt="ZeroRo AI Agent Interface" 
-                      className="relative z-10 w-full h-full object-contain"
-                    />
-                    {/* Overlay UI Mockup Elements */}
-                    <div className="absolute top-4 right-4 z-20">
-                      <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold shadow-lg flex items-center gap-2 border border-emerald-100">
-                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                         AI 분석 완료
-                      </div>
+                <div className="rounded-xl overflow-hidden bg-[#F5F5F7] relative aspect-[4/3]">
+                  <img
+                    src="/agent.jpg"
+                    alt="ZeroRo AI Agent Interface"
+                    className="relative z-10 w-full h-full object-contain"
+                  />
+                  {/* Overlay UI Mockup Elements */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold shadow-lg flex items-center gap-2 border border-emerald-100">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                      AI 분석 완료
                     </div>
-                 </div>
+                  </div>
+                </div>
               </GlassCard>
             </div>
           </div>
@@ -274,26 +274,26 @@ export default function LandingPage() {
             <div className="order-2 lg:order-1 relative group">
               {/* Decorative background blob */}
               <div className="absolute -inset-4 bg-gradient-to-r from-emerald-300 to-blue-300 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
-              
+
               <GlassCard className="relative overflow-hidden p-3 border-white/60 shadow-2xl rotate-1 hover:rotate-0 transition-transform duration-500">
-                 <div className="rounded-xl overflow-hidden bg-white relative aspect-[4/3]">
-                    <div className="absolute inset-0 bg-slate-100 animate-pulse" /> {/* Loading placeholder */}
-                    <img 
-                      src="/ploggingmap.gif" 
-                      alt="ZeroRo App Plogging Map Interface" 
-                      className="relative z-10 w-full h-full object-cover"
-                    />
-                    {/* Overlay UI Mockup Elements */}
-                    <div className="absolute bottom-4 left-4 right-4 z-20 flex gap-2">
-                      <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg text-xs font-bold shadow-sm flex items-center gap-2">
-                         <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                         실시간 추적
-                      </div>
-                      <div className="bg-emerald-500/90 backdrop-blur-md px-3 py-2 rounded-lg text-xs font-bold text-white shadow-sm ml-auto">
-                         + 150 포인트
-                      </div>
+                <div className="rounded-xl overflow-hidden bg-white relative aspect-[4/3]">
+                  <div className="absolute inset-0 bg-slate-100 animate-pulse" /> {/* Loading placeholder */}
+                  <img
+                    src="/ploggingmap.gif"
+                    alt="ZeroRo App Plogging Map Interface"
+                    className="relative z-10 w-full h-full object-cover"
+                  />
+                  {/* Overlay UI Mockup Elements */}
+                  <div className="absolute bottom-4 left-4 right-4 z-20 flex gap-2">
+                    <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg text-xs font-bold shadow-sm flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                      실시간 추적
                     </div>
-                 </div>
+                    <div className="bg-emerald-500/90 backdrop-blur-md px-3 py-2 rounded-lg text-xs font-bold text-white shadow-sm ml-auto">
+                      + 150 포인트
+                    </div>
+                  </div>
+                </div>
               </GlassCard>
             </div>
 
@@ -305,20 +305,20 @@ export default function LandingPage() {
                   앱 기능
                 </div>
                 <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
-                  세상을 탐험하세요, <br/>
+                  세상을 탐험하세요, <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">한 걸음씩.</span>
                 </h3>
                 <p className="text-lg text-slate-600 leading-relaxed">
-                  <strong>ZeroRo 앱</strong>과 연결하여 주변 플로깅 핫스팟을 찾아보세요.
-                  인터랙티브 지도가 관심이 필요한 지역으로 안내하고, 실시간으로 청소 경로를 추적하며,
+                  <strong>ZeroRo 앱</strong>과 연결하여 플로깅을 진행해 보세요.
+                  지도로 플로깅 진행이 더딘 구역을 확인 가능하고, 경로를 추적하며
                   에코 포인트로 기여에 보상합니다.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
-                  { icon: Navigation, title: "스마트 경로", desc: "최대 청소 효율을 위한 최적화된 경로." },
-                  { icon: Activity, title: "실시간 히트맵", desc: "커뮤니티 영향을 실시간으로 시각화합니다." }
+                  { icon: Navigation, title: "부정 행위 방지", desc: "20분 간격으로 AI 에이전트가 플로깅 진행을 검증합니다." },
+                  { icon: Activity, title: "실시간 히트맵", desc: "플로깅 경로를 실시간으로 시각화하여 플로깅 진행을 격려합니다." }
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 items-start">
                     <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
@@ -345,9 +345,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: Zap, title: "캠페인 빌더", desc: "비기술 관리자를 위해 설계된 드래그 앤 드롭 미션 생성 도구." },
+              { icon: Zap, title: "캠페인 빌더", desc: "비기술 관리자를 위해 설계된 캠페인 및 미션 생성 도구." },
               { icon: ShieldCheck, title: "AI 검증", desc: "Google Gemini Vision API가 사진 제출물을 자동으로 검증하여 부정행위를 방지합니다." },
-              { icon: Activity, title: "실시간 분석", desc: "참여율, 탄소 감소량, 지역 히트맵을 위한 라이브 대시보드." }
+              { icon: Activity, title: "실시간 분석", desc: "캠페인 참여 현황과 제출물을 실시간으로 모니터링하고, 지역별 활동 히트맵으로 성과를 한눈에 파악합니다." }
             ].map((f, i) => (
               <GlassCard key={i} className="p-8 hover:bg-white/40 transition-all duration-300 group hover:-translate-y-2">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center text-slate-900 mb-6 bg-white/50 border border-white/60 shadow-sm group-hover:bg-emerald-500/10 group-hover:text-emerald-700 transition-colors">
