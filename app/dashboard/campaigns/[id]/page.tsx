@@ -533,10 +533,10 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                     <PieChart>
                       <Pie
                         data={[
-                          { name: '완료', value: stats.statusBreakdown.completed },
-                          { name: '검수대기', value: stats.statusBreakdown.pendingVerification },
-                          { name: '진행중', value: stats.statusBreakdown.inProgress },
-                          { name: '거부', value: stats.statusBreakdown.failed }
+                          { name: '완료', value: stats.statusBreakdown.completed, color: '#10b981' },
+                          { name: '검수대기', value: stats.statusBreakdown.pendingVerification, color: '#f59e0b' },
+                          { name: '진행중', value: stats.statusBreakdown.inProgress, color: '#3b82f6' },
+                          { name: '거부', value: stats.statusBreakdown.failed, color: '#ef4444' }
                         ].filter(d => d.value > 0)}
                         cx="50%"
                         cy="50%"
@@ -546,8 +546,13 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                       >
-                        {COLORS.map((color, index) => (
-                          <Cell key={`cell-${index}`} fill={color} />
+                        {[
+                          { name: '완료', value: stats.statusBreakdown.completed, color: '#10b981' },
+                          { name: '검수대기', value: stats.statusBreakdown.pendingVerification, color: '#f59e0b' },
+                          { name: '진행중', value: stats.statusBreakdown.inProgress, color: '#3b82f6' },
+                          { name: '거부', value: stats.statusBreakdown.failed, color: '#ef4444' }
+                        ].filter(d => d.value > 0).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
                       <Tooltip />
