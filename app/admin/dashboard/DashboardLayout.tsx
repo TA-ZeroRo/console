@@ -2,12 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-// Assuming you have an existing Logo component or will create one
-import Logo from '@/app/components/Logo'; 
-// Assuming you have a general UiKit component for buttons, inputs, etc.
 import { Button } from '@/app/components/UiKit'; 
 import { Search, ChevronDown, Bell, Settings, LogOut, LayoutDashboard, BarChart2, Users, ShoppingBag } from 'lucide-react'; // Example icons
 import Footer from '@/app/components/Footer'; // Import the new Footer component
+import { Logo } from '@/app/components/Logo';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
