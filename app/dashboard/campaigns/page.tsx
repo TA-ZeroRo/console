@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import {
@@ -114,6 +115,39 @@ const CampaignList: React.FC<CampaignListProps> = ({
   onCampaignClick
 }) => {
   const router = useRouter();
+  const [deleteTarget, setDeleteTarget] = useState<CampaignData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = (campaign: CampaignData, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteTarget(campaign);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+
+    try {
+      const res = await fetch(`/api/campaigns/${deleteTarget.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || '캠페인 삭제 실패');
+      }
+
+      setDeleteTarget(null);
+      onRefresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -178,7 +212,7 @@ const CampaignList: React.FC<CampaignListProps> = ({
                   <th className="px-6 py-4 font-semibold text-slate-700 text-center">상태</th>
                   <th className="px-6 py-4 font-semibold text-slate-700 text-center">카테고리</th>
                   <th className="px-6 py-4 font-semibold text-slate-700 text-center">기간</th>
-                  <th className="px-6 py-4 font-semibold text-slate-700 text-center">관리</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700 text-center">삭제</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -214,7 +248,13 @@ const CampaignList: React.FC<CampaignListProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-5 text-center">
-                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors inline-block" />
+                      <button
+                        onClick={(e) => handleDeleteClick(campaign, e)}
+                        className="p-1.5 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="캠페인 삭제"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -223,6 +263,45 @@ const CampaignList: React.FC<CampaignListProps> = ({
           </div>
         )}
       </Card>
+
+      {/* 삭제 확인 모달 */}
+      {deleteTarget && typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <div className="text-center">
+              <div className="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">캠페인 삭제</h3>
+              <p className="text-slate-600 mb-1">
+                &ldquo;<span className="font-medium">{deleteTarget.title}</span>&rdquo;
+              </p>
+              <p className="text-sm text-slate-500 mb-6">
+                정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+              >
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={handleConfirmDelete}
+                isLoading={isDeleting}
+              >
+                삭제
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 };
