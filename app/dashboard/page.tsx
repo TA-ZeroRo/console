@@ -69,7 +69,21 @@ interface DashboardOverview {
   campaignCompletionRate: number;
 }
 
-const COLORS = ['#10b981', '#14b8a6', '#22c55e', '#059669', '#0d9488', '#0f766e'];
+const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#14b8a6', '#ec4899', '#06b6d4'];
+
+// 카테고리별 색상 매핑 함수
+const getCategoryColor = (category: string, index: number): string => {
+  // 교육은 항상 파란색
+  if (category === '교육') {
+    return '#3b82f6';
+  }
+  // 기타는 주황색
+  if (category === '기타') {
+    return '#f59e0b';
+  }
+  // 나머지는 인덱스 기반으로 할당
+  return COLORS[index % COLORS.length];
+};
 
 const KPICard = ({ title, value, icon: Icon, trend, trendUp, onClick, clickable, color = 'blue' }: any) => {
   const colorMap: Record<string, string> = {
@@ -763,7 +777,7 @@ export default function DashboardPage() {
                           data={overview.categoryDistribution.map((item, index) => ({
                             name: item.category,
                             value: item.participants,
-                            color: COLORS[index % COLORS.length]
+                            color: getCategoryColor(item.category, index)
                           }))}
                           cx="50%"
                           cy="50%"
@@ -779,7 +793,7 @@ export default function DashboardPage() {
                           style={{ cursor: 'pointer' }}
                         >
                           {overview.categoryDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                            <Cell key={`cell-${index}`} fill={getCategoryColor(entry.category, index)} stroke="none" />
                           ))}
                         </Pie>
                         <Tooltip
@@ -812,7 +826,7 @@ export default function DashboardPage() {
                         >
                           <div
                             className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            style={{ backgroundColor: getCategoryColor(item.category, index) }}
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-slate-900 truncate">{item.category}</p>
@@ -886,8 +900,8 @@ export default function DashboardPage() {
 
       {/* Campaign Rankings Modal */}
       {showCampaignRankingModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <Award className="w-6 h-6 text-orange-500" />
@@ -901,7 +915,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {campaignRankings ? (
                 <div className="space-y-4">
                   {campaignRankings.rankings.map((campaign: any, index: number) => (
@@ -991,8 +1005,8 @@ export default function DashboardPage() {
 
       {/* Completion Rate Modal */}
       {showCompletionRateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-purple-600" />
@@ -1006,7 +1020,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               <div className="space-y-6">
                 {/* Overall Rate */}
                 <div className="bg-white rounded-xl p-8 border border-slate-200 shadow-sm text-center">
@@ -1100,8 +1114,8 @@ export default function DashboardPage() {
 
       {/* 총 참여자 상세 모달 */}
       {showParticipantsDrawer && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* 모달 헤더 */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <div>
@@ -1146,7 +1160,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 모달 컨텐츠 */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {participantsDrawerTab === 'daily' && (
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-4">일별 참여자 추이</h3>
@@ -1232,8 +1246,8 @@ export default function DashboardPage() {
 
       {/* 이번 주 신규 상세 모달 */}
       {showNewUsersModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* Modal Header */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <div>
@@ -1252,7 +1266,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {newUsersData ? (
                 <div className="space-y-6">
                   {/* 일별 신규 추이 */}
@@ -1373,8 +1387,8 @@ export default function DashboardPage() {
 
       {/* 미션 성과 상세 모달 */}
       {showCompletionDrawer && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* 모달 헤더 */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <div>
@@ -1429,7 +1443,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 모달 컨텐츠 */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {completionDrawerTab === 'daily' && (
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-4">일별 완료율 추이</h3>
@@ -1572,8 +1586,8 @@ export default function DashboardPage() {
 
       {/* CO2 절감량 상세 모달 */}
       {showCO2Modal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* Modal Header */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <div>
@@ -1592,7 +1606,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {co2Data ? (
                 <div className="space-y-6">
                   {/* 테이블 */}
@@ -1667,8 +1681,8 @@ export default function DashboardPage() {
 
       {/* Top 캠페인 상세 모달 */}
       {showTopCampaignDrawer && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* 모달 헤더 */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-100">
               <div>
@@ -1733,7 +1747,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 모달 컨텐츠 */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] bg-slate-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
               {topCampaignData && topCampaignData.rankings && topCampaignData.rankings.length > 0 ? (
                 <div className="space-y-3">
                   {(() => {
@@ -1817,8 +1831,8 @@ export default function DashboardPage() {
 
       {/* 차트 상세 드로어 */}
       {showChartDetailDrawer && chartDetailData && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl h-full shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full h-full overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
             {/* 드로어 헤더 */}
             <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-200">
               <div>
@@ -1839,98 +1853,44 @@ export default function DashboardPage() {
 
             {/* 드로어 컨텐츠 */}
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-4xl mx-auto">
                 {/* 통계 카드 */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                  <div className="bg-blue-50 rounded-xl p-5 border-2 border-blue-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-slate-500">참여자</span>
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Users className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-blue-700">참여자</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.participants?.toLocaleString() || '0'}</p>
+                    <p className="text-3xl font-bold text-blue-900">{chartDetailData.participants?.toLocaleString() || '0'}</p>
                   </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                  <div className="bg-emerald-50 rounded-xl p-5 border-2 border-emerald-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium text-slate-500">완료 수</span>
+                      <div className="p-2 bg-emerald-100 rounded-lg">
+                        <Target className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <span className="text-sm font-medium text-emerald-700">완료 수</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.completed?.toLocaleString() || '0'}</p>
+                    <p className="text-3xl font-bold text-emerald-900">{chartDetailData.completed?.toLocaleString() || '0'}</p>
                   </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                  <div className="bg-purple-50 rounded-xl p-5 border-2 border-purple-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-5 h-5 text-purple-600" />
-                      <span className="text-sm font-medium text-slate-500">완료율</span>
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <span className="text-sm font-medium text-purple-700">완료율</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.completionRate || '0'}%</p>
+                    <p className="text-3xl font-bold text-purple-900">{chartDetailData.completionRate || '0'}%</p>
                   </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
+                  <div className="bg-teal-50 rounded-xl p-5 border-2 border-teal-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <Leaf className="w-5 h-5 text-teal-600" />
-                      <span className="text-sm font-medium text-slate-500">CO2 절감</span>
+                      <div className="p-2 bg-teal-100 rounded-lg">
+                        <Leaf className="w-5 h-5 text-teal-600" />
+                      </div>
+                      <span className="text-sm font-medium text-teal-700">CO2 절감</span>
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.co2Reduction?.toLocaleString() || '0'}kg</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 차트 상세 드로어 */}
-      {showChartDetailDrawer && chartDetailData && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-end animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl h-full shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden flex flex-col">
-            {/* 드로어 헤더 */}
-            <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-200">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {chartDetailData.type === 'category' && `카테고리: ${chartDetailData.value}`}
-                  {chartDetailData.type === 'region' && `지역: ${chartDetailData.value}`}
-                  {chartDetailData.type === 'date' && `날짜: ${new Date(chartDetailData.value).toLocaleDateString('ko-KR')}`}
-                </h2>
-                <p className="text-sm text-slate-500 mt-1">상세 통계</p>
-              </div>
-              <button
-                onClick={() => setShowChartDetailDrawer(false)}
-                className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full p-2 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* 드로어 컨텐츠 */}
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
-              <div className="space-y-6">
-                {/* 통계 카드 */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-slate-500">참여자</span>
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.participants?.toLocaleString() || '0'}</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium text-slate-500">완료 수</span>
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.completed?.toLocaleString() || '0'}</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-5 h-5 text-purple-600" />
-                      <span className="text-sm font-medium text-slate-500">완료율</span>
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.completionRate || '0'}%</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-5 border border-slate-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Leaf className="w-5 h-5 text-teal-600" />
-                      <span className="text-sm font-medium text-slate-500">CO2 절감</span>
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900">{chartDetailData.co2Reduction?.toLocaleString() || '0'}kg</p>
+                    <p className="text-3xl font-bold text-teal-900">{chartDetailData.co2Reduction?.toLocaleString() || '0'}kg</p>
                   </div>
                 </div>
               </div>
