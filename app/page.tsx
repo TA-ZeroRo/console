@@ -374,13 +374,13 @@ export default function LandingPage() {
               {/* Decorative background blob */}
               <div className="absolute -inset-4 bg-gradient-to-l from-emerald-300 to-blue-300 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
 
-              <GlassCard className="relative overflow-hidden p-0 border-white/60 shadow-2xl -rotate-1 hover:rotate-0 transition-transform duration-500">
-                <div className="rounded-xl overflow-hidden bg-slate-100 relative">
+              <GlassCard className="relative overflow-hidden p-3 border-white/60 shadow-2xl -rotate-1 hover:rotate-0 transition-transform duration-500">
+                <div className="rounded-xl overflow-hidden bg-slate-100 relative aspect-[4/3]">
                   {/* Combined Image */}
                   <img
                     src="/campaign_recruiting.png"
                     alt="Campaign and Recruiting Interface"
-                    className="w-full h-auto object-cover"
+                    className="relative z-10 w-full h-full object-contain"
                   />
                 </div>
               </GlassCard>
