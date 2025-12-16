@@ -11,6 +11,10 @@ export async function GET(
     const campaignId = parseInt(id);
     const supabase = await createClient();
 
+    // 쿼리 파라미터 추출
+    const searchParams = request.nextUrl.searchParams;
+    const aiFilter = searchParams.get('ai_filter') as 'all' | 'qualified' | 'not_qualified' | null;
+
     // 로그인된 사용자 확인
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -95,6 +99,8 @@ export async function GET(
       userImg: string | null;
       status: 'pending' | 'approved' | 'rejected';
       totalPoints: number;
+      aiQualified: boolean | null; // AI 검증 결과 (null = 검증 없음)
+      aiReason: string | null; // AI 판정 이유
       missions: Array<{
         missionId: number;
         missionTitle: string;
@@ -102,6 +108,11 @@ export async function GET(
         status: string;
         proofData: any;
         completedAt: string | null;
+        aiResult: {
+          isValid: boolean;
+          confidence: number;
+          reason: string;
+        } | null;
       }>;
       submittedAt: string | null;
     }> = [];
@@ -121,19 +132,49 @@ export async function GET(
       if (hasPendingAll || hasCompletedAll || hasFailedAll) {
         const profileData = userLogs[0]?.profiles as any;
 
-        // 미션별 정보 매핑
+        // 미션별 정보 매핑 (AI 검증 결과 포함)
         const missions = templates.map(template => {
           const log = userLogs.find(l => l.mission_template_id === template.id);
+          const proofData = log?.proof_data as any;
+          const verificationResult = proofData?.verification_result;
+
           return {
             missionId: template.id,
             missionTitle: template.title,
             verificationType: template.verification_type,
             rewardPoints: template.reward_points,
             status: log?.status || 'NOT_STARTED',
-            proofData: log?.proof_data || null,
-            completedAt: log?.completed_at || null
+            proofData: proofData || null,
+            completedAt: log?.completed_at || null,
+            aiResult: verificationResult ? {
+              isValid: verificationResult.is_valid ?? false,
+              confidence: verificationResult.confidence ?? 0,
+              reason: verificationResult.reason ?? ''
+            } : null
           };
         });
+
+        // AI 검증 결과 종합 (모든 미션의 AI 판정 기반)
+        const aiResults = missions
+          .filter(m => m.aiResult !== null)
+          .map(m => m.aiResult!);
+
+        let aiQualified: boolean | null = null;
+        let aiReason: string | null = null;
+
+        if (aiResults.length > 0) {
+          // 모든 미션이 AI 적격이면 적격, 하나라도 부적격이면 부적격
+          const allValid = aiResults.every(r => r.isValid);
+          aiQualified = allValid;
+
+          // 부적격 이유 수집
+          const failedReasons = aiResults
+            .filter(r => !r.isValid)
+            .map(r => r.reason);
+          aiReason = failedReasons.length > 0
+            ? failedReasons.join(' / ')
+            : aiResults[0]?.reason || null;
+        }
 
         // 총 포인트 계산
         const totalPoints = templates.reduce((sum, t) => sum + t.reward_points, 0);
@@ -153,6 +194,8 @@ export async function GET(
           userImg: profileData?.user_img || null,
           status,
           totalPoints,
+          aiQualified,
+          aiReason,
           missions,
           submittedAt: latestCompletedAt || null
         });
@@ -168,9 +211,18 @@ export async function GET(
       return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
     });
 
+    // AI 필터 적용
+    let filteredVerifications = verifications;
+    if (aiFilter === 'qualified') {
+      filteredVerifications = verifications.filter(v => v.aiQualified === true);
+    } else if (aiFilter === 'not_qualified') {
+      filteredVerifications = verifications.filter(v => v.aiQualified === false);
+    }
+    // 'all' 또는 null인 경우 필터링 없음
+
     return NextResponse.json({
       data: {
-        verifications,
+        verifications: filteredVerifications,
         templates: templates.map(t => ({
           id: t.id,
           title: t.title,

@@ -579,6 +579,11 @@ const CampaignBuilder: React.FC<CampaignBuilderProps> = ({ onCancel, onSuccess }
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>취소</Button>
+          {step === 2 && (
+            <Button variant="outline" onClick={() => setStep(1)} disabled={isSubmitting}>
+              이전 단계
+            </Button>
+          )}
           <Button
             disabled={loadingAI || isSubmitting}
             isLoading={isSubmitting}

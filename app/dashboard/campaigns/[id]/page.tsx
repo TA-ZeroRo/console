@@ -17,7 +17,9 @@ import {
   Image as ImageIcon,
   FileText,
   HelpCircle,
-  Navigation
+  Navigation,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from '../../../components/UiKit';
@@ -88,6 +90,11 @@ interface VerificationMission {
   status: string;
   proofData: any;
   completedAt: string | null;
+  aiResult: {
+    isValid: boolean;
+    confidence: number;
+    reason: string;
+  } | null;
 }
 
 interface Verification {
@@ -96,9 +103,13 @@ interface Verification {
   userImg: string | null;
   status: 'pending' | 'approved' | 'rejected';
   totalPoints: number;
+  aiQualified: boolean | null; // AI 검증 결과 (null = 검증 없음)
+  aiReason: string | null; // AI 판정 이유
   missions: VerificationMission[];
   submittedAt: string | null;
 }
+
+type AiFilterType = 'all' | 'qualified' | 'not_qualified';
 
 type TabType = 'info' | 'stats' | 'verification';
 
@@ -116,6 +127,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingUser, setProcessingUser] = useState<string | null>(null);
+  const [aiFilter, setAiFilter] = useState<AiFilterType>('all');
 
   // 캠페인 정보 로드
   const fetchCampaign = async () => {
@@ -142,9 +154,12 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   };
 
   // 검수 대상 로드
-  const fetchVerifications = async () => {
+  const fetchVerifications = async (filter: AiFilterType = aiFilter) => {
     try {
-      const res = await fetch(`/api/campaigns/${id}/verifications`);
+      const url = filter === 'all'
+        ? `/api/campaigns/${id}/verifications`
+        : `/api/campaigns/${id}/verifications?ai_filter=${filter}`;
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '검수 대상 조회 실패');
       setVerifications(data.data.verifications || []);
@@ -193,6 +208,12 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     };
     loadData();
   }, [id]);
+
+  // AI 필터 변경 시 다시 로드
+  const handleAiFilterChange = (filter: AiFilterType) => {
+    setAiFilter(filter);
+    fetchVerifications(filter);
+  };
 
   // 미션별 퍼센트 데이터 계산
   const missionStatsWithPercentage = useMemo(() => {
@@ -611,6 +632,35 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
       {activeTab === 'verification' && (
         <>
+          {/* AI 필터 버튼 */}
+          <div className="flex items-center gap-2 mb-4">
+            <Bot className="w-5 h-5 text-slate-500" />
+            <span className="text-sm text-slate-600 font-medium mr-2">AI 판정:</span>
+            {[
+              { value: 'all' as const, label: '전체' },
+              { value: 'qualified' as const, label: 'AI 적격', color: 'emerald' },
+              { value: 'not_qualified' as const, label: 'AI 부적격', color: 'red' }
+            ].map(filter => (
+              <button
+                key={filter.value}
+                onClick={() => handleAiFilterChange(filter.value)}
+                className={`
+                  px-3 py-1.5 rounded-full text-sm font-medium transition-all
+                  ${aiFilter === filter.value
+                    ? filter.value === 'qualified'
+                      ? 'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-200'
+                      : filter.value === 'not_qualified'
+                        ? 'bg-red-100 text-red-700 ring-2 ring-red-200'
+                        : 'bg-slate-200 text-slate-700 ring-2 ring-slate-300'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }
+                `}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {verifications.length === 0 ? (
               <div className="col-span-full">
@@ -649,8 +699,23 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                             {verification.username?.charAt(0).toUpperCase() || '?'}
                           </div>
                         )}
-                        <div>
-                          <p className="font-medium text-slate-900">{verification.username || '알 수 없음'}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-slate-900">{verification.username || '알 수 없음'}</p>
+                            {/* AI 판정 배지 */}
+                            {verification.aiQualified !== null && (
+                              <span className={`
+                                inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+                                ${verification.aiQualified
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-red-100 text-red-700'
+                                }
+                              `}>
+                                <Sparkles className="w-3 h-3" />
+                                {verification.aiQualified ? '적격' : '부적격'}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-slate-500">{verification.totalPoints}P</p>
                         </div>
                       </div>
@@ -710,6 +775,15 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                         <Badge variant="info">{selectedVerification.totalPoints}P</Badge>
                         <span>•</span>
                         <span>미션 {selectedVerification.missions.length}개 완료</span>
+                        {selectedVerification.aiQualified !== null && (
+                          <>
+                            <span>•</span>
+                            <span className={`inline-flex items-center gap-1 font-medium ${selectedVerification.aiQualified ? 'text-emerald-600' : 'text-red-600'}`}>
+                              <Sparkles className="w-3.5 h-3.5" />
+                              AI {selectedVerification.aiQualified ? '적격' : '부적격'}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -726,17 +800,41 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                   <div className="max-w-3xl mx-auto space-y-8">
                     {selectedVerification.missions.map((mission, idx) => (
                       <div key={mission.missionId} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">
-                              {idx + 1}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              {getVerificationTypeIcon(mission.verificationType)}
-                              <span className="font-bold text-slate-800">{mission.missionTitle}</span>
+                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">
+                                {idx + 1}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                {getVerificationTypeIcon(mission.verificationType)}
+                                <span className="font-bold text-slate-800">{mission.missionTitle}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {/* AI 판정 배지 */}
+                              {mission.aiResult && (
+                                <span className={`
+                                  inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+                                  ${mission.aiResult.isValid
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-red-100 text-red-700'
+                                  }
+                                `}>
+                                  <Sparkles className="w-3 h-3" />
+                                  {mission.aiResult.isValid ? '적격' : '부적격'}
+                                  <span className="opacity-70">({Math.round(mission.aiResult.confidence * 100)}%)</span>
+                                </span>
+                              )}
+                              <span className="text-sm font-bold text-emerald-600">+{mission.rewardPoints}P</span>
                             </div>
                           </div>
-                          <span className="text-sm font-bold text-emerald-600">+{mission.rewardPoints}P</span>
+                          {/* AI 판정 이유 */}
+                          {mission.aiResult?.reason && (
+                            <div className="mt-2 ml-9 p-2 bg-slate-100 rounded-md text-sm text-slate-600">
+                              <span className="font-medium">AI 판정:</span> {mission.aiResult.reason}
+                            </div>
+                          )}
                         </div>
 
                         <div className="p-6">
