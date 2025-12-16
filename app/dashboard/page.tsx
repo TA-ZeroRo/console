@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/app/lib/supabase/client';
 import {
   Users,
   Target,
@@ -128,6 +129,7 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, onClick, clickable,
 export default function DashboardPage() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [showCampaignRankingModal, setShowCampaignRankingModal] = useState(false);
   const [campaignRankings, setCampaignRankings] = useState<any>(null);
   const [showCompletionRateModal, setShowCompletionRateModal] = useState(false);
@@ -169,7 +171,29 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchOrganizationName = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data: partner } = await supabase
+            .from('partners')
+            .select('organization_name')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (partner) {
+            setOrganizationName(partner.organization_name);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch organization name:', error);
+      }
+    };
+
     fetchOverview();
+    fetchOrganizationName();
   }, []);
 
   // 차트 탭 변경 시 지역 분포 데이터 로드
@@ -201,15 +225,20 @@ export default function DashboardPage() {
   const handleExport = async (format: 'csv' | 'pdf' | 'docx') => {
     if (!overview) return;
 
+    const exportData = {
+      ...overview,
+      organizationName: organizationName || undefined
+    };
+
     switch (format) {
       case 'csv':
-        exportToCSV(overview);
+        exportToCSV(exportData);
         break;
       case 'pdf':
-        await exportToPDF(overview);
+        await exportToPDF(exportData);
         break;
       case 'docx':
-        await exportToDOCX(overview);
+        await exportToDOCX(exportData);
         break;
     }
     setShowExportDropdown(false);
@@ -533,7 +562,9 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-1">
             <p className={`text-sm font-medium ${overview.monthlyGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              전월 대비 {overview.monthlyGrowth > 0 ? '+' : ''}{overview.monthlyGrowth}%
+              {overview.monthlyGrowth >= 999 
+                ? '신규 시작'
+                : `전월 대비 ${overview.monthlyGrowth > 0 ? '+' : ''}${overview.monthlyGrowth}%`}
             </p>
           </div>
           <div className="absolute bottom-4 right-4 text-xs text-slate-400 group-hover:text-emerald-600 transition-colors">

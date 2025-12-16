@@ -147,9 +147,16 @@ export async function GET(request: NextRequest) {
     const totalParticipantsNow = totalParticipants;
 
     // 성장률 계산
-    const monthlyGrowth = totalParticipantsUntilLastMonth > 0
-      ? Math.round(((totalParticipantsNow - totalParticipantsUntilLastMonth) / totalParticipantsUntilLastMonth) * 100)
-      : 0;
+    let monthlyGrowth = 0;
+    if (totalParticipantsUntilLastMonth > 0) {
+      // 전월에 참여자가 있었던 경우: 정상 계산
+      monthlyGrowth = Math.round(((totalParticipantsNow - totalParticipantsUntilLastMonth) / totalParticipantsUntilLastMonth) * 100);
+    } else if (totalParticipantsNow > 0) {
+      // 전월에 참여자가 없었고 현재 참여자가 있는 경우: 신규 시작으로 간주
+      // 매우 큰 증가율로 표시 (예: 999% 또는 실제 증가 수를 표시)
+      monthlyGrowth = 999; // 무한대 증가를 의미하는 특수 값
+    }
+    // 둘 다 0인 경우는 monthlyGrowth = 0 유지
 
     // 6. 이번 주 신규 참여자 (최근 7일간 첫 참여한 사용자 수)
     const sevenDaysAgo = new Date();
